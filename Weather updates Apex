@@ -1,0 +1,48 @@
+public with sharing class WeatherUpdatesClass {
+    @AuraEnabled
+    public static WeatherDetailsWrapper getWeatherDetails(String cityName){
+        //Frame the Endpoint URL
+        String apiKey ='236aa0988b218819ca848e2585f2747a';
+        String endpoint = 'http://api.openweathermap.org/data/2.5/weather';
+        endpoint += '?q=' +cityName;
+        endpoint += '&units=metric';
+        endpoint += 'APPID=' +apiKey;
+        System.debug('endpoint URL:' +endpoint);
+        
+        //callout to weather API
+        Http http = new http();
+        HttpRequest req = new HttpRequest();
+        req.setEndpoint(endpoint);
+        req.setMethod('GET');
+        HttpResponse res = http.send(req);
+        System.debug('res' +res+ 'body' +JSON.deserializeUntyped(res.getBody()));
+        
+        //return the weather details in wrapper form
+        WeatherDetailsWrapper weathDet = new WeatherDetailsWrapper();
+        if(res.getStatusCode() == 200){
+            Map<String,object> result = (Map<String,object>)JSON.deserializeUntyped(res.getBody());
+            weathDet.city = String.valueOf(result.get('name'));
+            Map<String,object> mainresult = (Map<String,object>) (result.get('main'));
+            weathDet.temperature = String.ValueOf(mainresult.get('temp'));
+            weathDet.humidity = String.ValueOf(mainresult.get('humidity'));
+            weathDet.pressure = String.ValueOf(mainresult.get('pressure'));
+            weathDet.tempmax = String.ValueOf(mainresult.get('temp_max'));
+            weathDet.tempmin = String.ValueOf(mainresult.get('temp_min'));
+        
+        }
+        System.debug('weathDet' + weathDet);
+        return weathDet;
+           
+    }
+    
+    //Wrapper class to store weather Details
+    
+    public class WeatherDetailsWrapper{
+        @AuraEnabled public string city{get;set;}
+        @AuraEnabled public string temperature{get;set;}
+        @AuraEnabled public string humidity{get;set;}
+        @AuraEnabled public string pressure{get;set;}
+        @AuraEnabled public string tempmax{get;set;}
+        @AuraEnabled public string tempmin{get;set;}
+    }
+}
