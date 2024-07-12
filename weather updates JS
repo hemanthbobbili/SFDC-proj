@@ -1,0 +1,24 @@
+import { LightningElement } from 'lwc';
+import getWeatherDetails from '@salesforce/apex/WeatherUpdatesClass.getWeatherDetails'
+export default class WeatherComponent extends LightningElement {
+    inputCityName = '';
+		weatherDetails ={};
+		showWeathDetails = false;
+		
+		handleInputChange(event){
+				this.inputCityName = event.detail.value;
+		}
+		
+		handleWeatherDetails(){
+				getWeatherDetails({cityName : this.inputCityName})
+				.then((result) => {
+						this.showWeathDetails = true;
+						this.weatherDetails = result;
+				})
+				.catch((error) =>{
+						this.showWeathDetails = false;
+						console.log('Some error occurred while fetching weather details');
+				});
+				console.log('result '+JSON.stringify(this.weatherDetails));
+		}
+}
